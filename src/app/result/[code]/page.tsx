@@ -5,10 +5,16 @@ import data from "@/data/types.json";
 type Params = { code: string };
 
 // 文字化けや全角ダッシュ対策の正規化
-function safeDecode(s: string) { try { return decodeURIComponent(s); } catch { return s; } }
+function safeDecode(s: string) {
+  try {
+    return decodeURIComponent(s);
+  } catch {
+    return s;
+  }
+}
 function normalizeCode(raw: string): string {
   return safeDecode(raw)
-    .replace(/[‐\-‒–—−―ー－]/g, "-") // ← ハイフンは \- でエスケープ
+    .replace(/[‐\-‒–—−―ー－]/g, "-") // ハイフン類は半角ハイフンに
     .replace(/\s+/g, "")
     .toUpperCase();
 }
@@ -25,7 +31,7 @@ export async function generateMetadata(
   const description = profile
     ? `${profile.name}（${profile.code}） - 診断結果`
     : "診断結果";
-  const site = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const site = process.env.NEXT_PUBLIC_SITE_URL || "https://16jobtype.vercel.app";
   const og = `${site}/og/result/${encodeURIComponent(code)}`;
 
   return {
@@ -39,7 +45,7 @@ export async function generateMetadata(
 export default async function ResultPage(
   { params }: { params: Promise<Params> }
 ) {
-  const { code: raw } = await params;          // ★ ここも await が必須
+  const { code: raw } = await params; // ★ await が必須
   const code = normalizeCode(raw);
   const profile = (data as any)[code];
 
@@ -55,8 +61,9 @@ export default async function ResultPage(
     );
   }
 
+  const site = process.env.NEXT_PUBLIC_SITE_URL ?? "https://16jobtype.vercel.app";
   const shareText = `あなたは ${profile.emoji} ${profile.name}（${profile.code}） でした。
-${process.env.NEXT_PUBLIC_SITE_URL ?? "https://16jobtype.vercel.app"}/result/${profile.code}
+${site}/result/${profile.code}
 
 #16JobType診断 #16ジョブタイプ診断`;
 
@@ -113,12 +120,11 @@ ${process.env.NEXT_PUBLIC_SITE_URL ?? "https://16jobtype.vercel.app"}/result/${p
         </section>
       </div>
 
-      {/* コピーやX投稿は Client コンポーネントに任せる */}
+      {/* コピーやX投稿は Client コンポーネントに任せる。ここはリンクのみ */}
       <section className="p-5 rounded-2xl border shadow bg-white">
         <h3 className="font-semibold mb-2">SNSでシェア</h3>
         <textarea className="w-full p-3 border rounded-xl" rows={4} readOnly value={shareText} />
         <div className="mt-2 flex gap-2">
-          {/* onClick をここに直接書かない（サーバーコンポーネントのため） */}
           <a
             className="px-4 py-2 rounded-xl border"
             href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`}

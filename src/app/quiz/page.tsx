@@ -1,4 +1,5 @@
 "use client";
+
 import { useMemo, useState, useEffect, useCallback } from "react";
 import { scoreFromAnswers } from "@/lib/scoring";
 import questions from "@/data/questions.json";
@@ -12,7 +13,7 @@ const LABEL: Record<Likert, string> = {
   2: "当てはまる",
   3: "どちらともいえない",
   4: "当てはまらない",
-  5: "まったく当てはまらない"
+  5: "まったく当てはまらない",
 };
 
 const LS_KEY = "quiz_answers_v1";
@@ -22,10 +23,11 @@ export default function QuizPage() {
   const [answers, setAnswers] = useState<Record<number, Likert>>({});
 
   const progress = useMemo(
-    () => Math.round(100 * Object.keys(answers).length / questions.length),
+    () => Math.round((100 * Object.keys(answers).length) / questions.length),
     [answers]
   );
 
+  // 途中保存の復元
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
@@ -34,6 +36,7 @@ export default function QuizPage() {
     } catch {}
   }, []);
 
+  // 自動保存
   useEffect(() => {
     if (typeof window === "undefined") return;
     localStorage.setItem(LS_KEY, JSON.stringify(answers));
@@ -99,6 +102,7 @@ export default function QuizPage() {
                 return (
                   <button
                     key={v}
+                    type="button"
                     role="radio"
                     aria-checked={active}
                     onClick={() => set(q.id, v)}
@@ -118,13 +122,18 @@ export default function QuizPage() {
 
       <div className="pt-2 flex items-center gap-3">
         <button
+          type="button"
           onClick={submit}
           disabled={Object.keys(answers).length !== questions.length}
           className="px-6 py-3 rounded-2xl border shadow bg-black text-white disabled:opacity-50"
         >
           結果を見る
         </button>
-        <button onClick={reset} className="px-4 py-3 rounded-2xl border shadow bg-white">
+        <button
+          type="button"
+          onClick={reset}
+          className="px-4 py-3 rounded-2xl border shadow bg-white"
+        >
           リセット
         </button>
         <span className="text-sm text-gray-500">
