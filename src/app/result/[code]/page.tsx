@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import data from "@/data/types.json";
+import ResultAds from "@/components/ResultAds";
 
 type Params = { code: string };
 
@@ -135,6 +136,8 @@ ${site}/result/${profile.code}
           </a>
         </div>
       </section>
+      <ResultAds />
+
 
       <div className="pt-2">
         <Link href="/" className="inline-block px-6 py-3 rounded-2xl border shadow bg-black text-white">もう一度診断する</Link>
